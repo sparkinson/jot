@@ -527,3 +527,9 @@ input:focus, textarea:focus { border-color: var(--muted); }
   .preview-stage.public { position: static; transform: none; min-height: auto; height: auto; }
   .preview-stage.public .preview-close-btn { display: none; }
 }
+
+/* Agent modal tabs */
+.agent-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.agent-tab { background: none; border: none; color: var(--muted); padding: 0.5rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; font-weight: 500; }
+.agent-tab:hover { color: var(--text); }
+.agent-tab.active { color: var(--text); border-bottom-color: var(--text); }

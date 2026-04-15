@@ -968,9 +968,10 @@
     const currentNoteId = state.note?.id || "<note-id>";
     const isOwnerView = state.viewer?.isOwner;
 
-    const lines = [];
+    // --- CLI instructions (existing) ---
+    const cliLines = [];
     if (isOwnerView) {
-      lines.push(
+      cliLines.push(
         `# Your user wants you to interact with a jot note using the CLI below.`,
         `# Run the commands as needed to read, edit, and comment on the note.`,
         ``,
@@ -1011,7 +1012,7 @@
       );
     } else {
       const shareUrl = `${baseUrl}/s/${state.note?.shareId || shareId}`;
-      lines.push(
+      cliLines.push(
         `# Your user wants you to interact with a shared jot note using the CLI below.`,
         `# Run the commands as needed to read, edit, and comment on the note.`,
         ``,
@@ -1036,10 +1037,43 @@
         `jot --help`,
       );
     }
-    const instructions = lines.join("\n");
-    const hint = isOwnerView
+    const cliInstructions = cliLines.join("\n");
+
+    // --- MCP instructions ---
+    const mcpConfig = JSON.stringify({
+      mcpServers: {
+        jot: {
+          command: "node",
+          args: ["/path/to/jot/mcp/dist/server.js"],
+          env: {
+            JOT_URL: baseUrl,
+            JOT_API_KEY: "<YOUR_API_KEY>",
+          },
+        },
+      },
+    }, null, 2);
+
+    const mcpLines = [
+      `# Add this to your Claude Code MCP config`,
+      `# (~/.claude/settings.json or project .mcp.json)`,
+      ``,
+      `# 1. Clone the repo and build the MCP server:`,
+      `git clone https://github.com/sparkinson/jot.git`,
+      `cd jot/mcp && npm install && npx tsc`,
+      ``,
+      `# 2. Create an API key in jot settings (on the landing page)`,
+      ``,
+      `# 3. Add to your settings.json:`,
+      mcpConfig,
+      ``,
+      `# Replace /path/to/jot with your actual clone path`,
+      `# Replace <YOUR_API_KEY> with the key from step 2`,
+    ].join("\n");
+
+    const cliHint = isOwnerView
       ? "Create an API key in settings on the landing page, then give your agent these instructions:"
       : "Give your agent these instructions to interact with this note:";
+    const mcpHint = "Set up the MCP server for Claude Code to get native tool access:";
 
     if (!refs.modalBackdrop) return;
     state.modalOpen = true;
@@ -1050,21 +1084,51 @@
           <h2 class="settings-title">Agent setup</h2>
           <jot-icon-button icon="close" label="Close" id="agentModalClose"></jot-icon-button>
         </div>
-        <p class="agent-hint">${escapeHtml(hint)}</p>
-        <pre class="agent-instructions"><code>${escapeHtml(instructions)}</code></pre>
-        <jot-button variant="ghost" size="sm" id="agentCopyBtn">copy to clipboard</jot-button>
+        <div class="agent-tabs">
+          <button type="button" class="agent-tab active" data-tab="cli">CLI</button>
+          <button type="button" class="agent-tab" data-tab="mcp">MCP</button>
+        </div>
+        <div class="agent-tab-content" data-tab-content="cli">
+          <p class="agent-hint">${escapeHtml(cliHint)}</p>
+          <pre class="agent-instructions"><code>${escapeHtml(cliInstructions)}</code></pre>
+          <jot-button variant="ghost" size="sm" class="agent-copy-btn" data-copy="cli">copy to clipboard</jot-button>
+        </div>
+        <div class="agent-tab-content hidden" data-tab-content="mcp">
+          <p class="agent-hint">${escapeHtml(mcpHint)}</p>
+          <pre class="agent-instructions"><code>${escapeHtml(mcpLines)}</code></pre>
+          <jot-button variant="ghost" size="sm" class="agent-copy-btn" data-copy="mcp">copy to clipboard</jot-button>
+        </div>
       </div>
     `;
 
+    const instructionsMap = { cli: cliInstructions, mcp: mcpLines };
+
+    // Tab switching
+    refs.modalBackdrop.querySelectorAll(".agent-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        refs.modalBackdrop.querySelectorAll(".agent-tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        const target = tab.dataset.tab;
+        refs.modalBackdrop.querySelectorAll(".agent-tab-content").forEach((c) => {
+          c.classList.toggle("hidden", c.dataset.tabContent !== target);
+        });
+      });
+    });
+
+    // Close
     const close = () => { closeModal(refs); };
     refs.modalBackdrop.querySelector("#agentModalClose").addEventListener("click", close);
     refs.modalBackdrop.addEventListener("click", (e) => { if (e.target === refs.modalBackdrop) close(); });
-    refs.modalBackdrop.querySelector("#agentCopyBtn").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(instructions);
-        setButtonLabel(refs.modalBackdrop.querySelector("#agentCopyBtn"), "copied!");
-        setTimeout(() => setButtonLabel(refs.modalBackdrop.querySelector("#agentCopyBtn"), "copy to clipboard"), 1500);
-      } catch {}
+
+    // Copy buttons
+    refs.modalBackdrop.querySelectorAll(".agent-copy-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(instructionsMap[btn.dataset.copy]);
+          setButtonLabel(btn, "copied!");
+          setTimeout(() => setButtonLabel(btn, "copy to clipboard"), 1500);
+        } catch {}
+      });
     });
   }
 

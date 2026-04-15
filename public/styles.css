@@ -533,3 +533,11 @@ input:focus, textarea:focus { border-color: var(--muted); }
 .agent-tab { background: none; border: none; color: var(--muted); padding: 0.5rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; font-weight: 500; }
 .agent-tab:hover { color: var(--text); }
 .agent-tab.active { color: var(--text); border-bottom-color: var(--text); }
+.agent-subtabs { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; }
+.agent-subtab { background: var(--code-bg); border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.75rem; cursor: pointer; border-radius: 6px; font-size: 0.8rem; font-weight: 500; }
+.agent-subtab:hover { color: var(--text); border-color: var(--text); }
+.agent-subtab.active { color: var(--text); background: var(--hover-bg); border-color: var(--text); }
+.agent-subtab-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.agent-subtab-content.hidden { display: none; }
+.agent-tab-content[data-tab-content="mcp"] { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.agent-tab-content[data-tab-content="mcp"].hidden { display: none; }

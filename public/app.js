@@ -1040,7 +1040,27 @@
     const cliInstructions = cliLines.join("\n");
 
     // --- MCP instructions ---
-    const mcpConfig = JSON.stringify({
+
+    // Claude Code: single bash command
+    const mcpClaudeCodeLines = [
+      `# 1. Clone the repo and build the MCP server:`,
+      `git clone https://github.com/sparkinson/jot.git`,
+      `cd jot/mcp && npm install && npx tsc`,
+      ``,
+      `# 2. Create an API key in jot settings (on the landing page)`,
+      ``,
+      `# 3. Add the MCP server to Claude Code:`,
+      `claude mcp add jot \\`,
+      `  -e JOT_URL=${baseUrl} \\`,
+      `  -e JOT_API_KEY=<YOUR_API_KEY> \\`,
+      `  -- node /path/to/jot/mcp/dist/server.js`,
+      ``,
+      `# Replace /path/to/jot with your actual clone path`,
+      `# Replace <YOUR_API_KEY> with the key from step 2`,
+    ].join("\n");
+
+    // Claude Desktop: JSON config
+    const desktopConfig = JSON.stringify({
       mcpServers: {
         jot: {
           command: "node",
@@ -1053,18 +1073,18 @@
       },
     }, null, 2);
 
-    const mcpLines = [
-      `# Add this to your Claude Code MCP config`,
-      `# (~/.claude/settings.json or project .mcp.json)`,
-      ``,
+    const mcpClaudeDesktopLines = [
       `# 1. Clone the repo and build the MCP server:`,
       `git clone https://github.com/sparkinson/jot.git`,
       `cd jot/mcp && npm install && npx tsc`,
       ``,
       `# 2. Create an API key in jot settings (on the landing page)`,
       ``,
-      `# 3. Add to your settings.json:`,
-      mcpConfig,
+      `# 3. Open Claude Desktop settings:`,
+      `#    Settings > Developer > Edit Config`,
+      ``,
+      `# 4. Add to your claude_desktop_config.json:`,
+      desktopConfig,
       ``,
       `# Replace /path/to/jot with your actual clone path`,
       `# Replace <YOUR_API_KEY> with the key from step 2`,
@@ -1073,7 +1093,7 @@
     const cliHint = isOwnerView
       ? "Create an API key in settings on the landing page, then give your agent these instructions:"
       : "Give your agent these instructions to interact with this note:";
-    const mcpHint = "Set up the MCP server for Claude Code to get native tool access:";
+    const mcpHint = "Set up the MCP server for native tool access:";
 
     if (!refs.modalBackdrop) return;
     state.modalOpen = true;
@@ -1095,13 +1115,27 @@
         </div>
         <div class="agent-tab-content hidden" data-tab-content="mcp">
           <p class="agent-hint">${escapeHtml(mcpHint)}</p>
-          <pre class="agent-instructions"><code>${escapeHtml(mcpLines)}</code></pre>
-          <jot-button variant="ghost" size="sm" class="agent-copy-btn" data-copy="mcp">copy to clipboard</jot-button>
+          <div class="agent-subtabs">
+            <button type="button" class="agent-subtab active" data-subtab="claude-code">Claude Code</button>
+            <button type="button" class="agent-subtab" data-subtab="claude-desktop">Claude Desktop</button>
+          </div>
+          <div class="agent-subtab-content" data-subtab-content="claude-code">
+            <pre class="agent-instructions"><code>${escapeHtml(mcpClaudeCodeLines)}</code></pre>
+            <jot-button variant="ghost" size="sm" class="agent-copy-btn" data-copy="mcp-claude-code">copy to clipboard</jot-button>
+          </div>
+          <div class="agent-subtab-content hidden" data-subtab-content="claude-desktop">
+            <pre class="agent-instructions"><code>${escapeHtml(mcpClaudeDesktopLines)}</code></pre>
+            <jot-button variant="ghost" size="sm" class="agent-copy-btn" data-copy="mcp-claude-desktop">copy to clipboard</jot-button>
+          </div>
         </div>
       </div>
     `;
 
-    const instructionsMap = { cli: cliInstructions, mcp: mcpLines };
+    const instructionsMap = {
+      cli: cliInstructions,
+      "mcp-claude-code": mcpClaudeCodeLines,
+      "mcp-claude-desktop": mcpClaudeDesktopLines,
+    };
 
     // Tab switching
     refs.modalBackdrop.querySelectorAll(".agent-tab").forEach((tab) => {
@@ -1111,6 +1145,18 @@
         const target = tab.dataset.tab;
         refs.modalBackdrop.querySelectorAll(".agent-tab-content").forEach((c) => {
           c.classList.toggle("hidden", c.dataset.tabContent !== target);
+        });
+      });
+    });
+
+    // Subtab switching (within MCP tab)
+    refs.modalBackdrop.querySelectorAll(".agent-subtab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        refs.modalBackdrop.querySelectorAll(".agent-subtab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        const target = tab.dataset.subtab;
+        refs.modalBackdrop.querySelectorAll(".agent-subtab-content").forEach((c) => {
+          c.classList.toggle("hidden", c.dataset.subtabContent !== target);
         });
       });
     });

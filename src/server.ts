@@ -1732,7 +1732,13 @@ function renderMarkdown(markdown: string) {
     },
     allowedSchemes: ["http", "https", "mailto"],
     transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
+      a: (tagName: string, attribs: sanitizeHtml.Attributes) => {
+        const href = attribs.href || "";
+        if (href.startsWith("#")) {
+          return { tagName, attribs };
+        }
+        return { tagName, attribs: { ...attribs, rel: "noopener noreferrer", target: "_blank" } };
+      },
     },
   });
 }

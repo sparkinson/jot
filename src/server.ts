@@ -1724,6 +1724,12 @@ function renderMarkdown(markdown: string) {
       img: ["src", "alt", "title"],
       code: ["class"],
       span: ["class"],
+      h1: ["id"],
+      h2: ["id"],
+      h3: ["id"],
+      h4: ["id"],
+      h5: ["id"],
+      h6: ["id"],
     },
     allowedClasses: {
       code: ["hljs", /^language-/],
@@ -2070,7 +2076,8 @@ function setCommenterNameCookie(req: Request, res: Response, name: string) {
 
 function ensureCommentAuthor(req: Request, res: Response) {
   if (isOwnerAuthenticated(req)) {
-    return { authorId: "__owner__", authorName: "Owner" };
+    const ownerName = getCommenterIdentity(req).name || "Owner";
+    return { authorId: "__owner__", authorName: ownerName };
   }
 
   const commenter = getCommenterIdentity(req);

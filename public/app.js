@@ -1354,7 +1354,7 @@
   function openComposerModal(options) {
     const refs = options.refs;
 
-    if (!state.viewer?.isOwner && !state.viewer?.commenterName) {
+    if (!state.viewer?.commenterName) {
       openIdentityModal(refs, true);
       return;
     }
@@ -1377,7 +1377,7 @@
       compact: true,
       onCancel,
       fields: [
-        ...(state.viewer?.isOwner || state.viewer?.commenterName
+        ...(state.viewer?.commenterName
           ? []
           : [
               {
@@ -1397,7 +1397,7 @@
         },
       ],
       onSubmit: async (values) => {
-        if (!state.viewer?.isOwner && !state.viewer?.commenterName && values.name) {
+        if (!state.viewer?.commenterName && values.name) {
           await api(`/api/share/${state.note.shareId}/identity`, {
             method: "POST",
             body: { name: values.name },

@@ -480,12 +480,17 @@ input:focus, textarea:focus { border-color: var(--muted); }
 .inline-error { color: var(--danger); margin-top: 0.65rem; }
 .public-page-topbar .topbar-title-subtle { color: var(--muted); font-size: 0.95rem; }
 
-/* --- Wide desktop: show rail in both editor and public views --- */
+/* --- Wide public desktop: show rail --- */
 @media (min-width: 1200px) {
+  .preview-stage.public .thread-rail { display: block; }
+  .preview-stage.public .preview-canvas { padding-right: calc(var(--thread-width) + 20px); }
+}
+
+/* --- Extra-wide desktop: show rail in editor too --- */
+@media (min-width: 1800px) {
   .preview-stage .thread-rail { display: block; }
   .preview-stage .preview-canvas { padding-right: calc(var(--thread-width) + 20px); }
-  .workspace { grid-template-columns: minmax(0, 640px) 1fr; }
-  .editor-pane { max-width: 640px; }
+  .workspace { grid-template-columns: minmax(0, 50%) 1fr; }
 }
 
 /* --- Preview button (editor narrow only, in topbar) --- */

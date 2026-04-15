@@ -86,6 +86,16 @@
     if (!refs.previewContent) return;
     refs.previewContent.innerHTML = html;
     renderMermaid(refs.previewContent);
+    refs.previewContent.addEventListener("click", (e) => {
+      const link = e.target.closest("a[href^='#']");
+      if (!link) return;
+      e.preventDefault();
+      const id = decodeURIComponent(link.getAttribute("href").slice(1));
+      const target = refs.previewContent.querySelector(`[id="${CSS.escape(id)}"]`);
+      if (target && refs.previewScroll) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
   }
 
   const shareAccess = document.body.dataset.shareAccess || "";

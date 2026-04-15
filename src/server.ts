@@ -139,8 +139,12 @@ const ownerCookieMaxAgeSeconds = 60 * 60 * 24 * 30;
 const commenterCookieMaxAgeSeconds = 60 * 60 * 24 * 365;
 const notes = new Map<string, NoteRecord>();
 
-const codeRenderer = new marked.Renderer();
-codeRenderer.code = ({ text, lang }: Tokens.Code) => {
+const customRenderer = new marked.Renderer();
+customRenderer.heading = ({ text, depth }: Tokens.Heading) => {
+  const slug = text.toLowerCase().replace(/<[^>]*>/g, "").replace(/[^\w]+/g, "-").replace(/(^-|-$)/g, "");
+  return `<h${depth} id="${escapeHtml(slug)}">${text}</h${depth}>\n`;
+};
+customRenderer.code = ({ text, lang }: Tokens.Code) => {
   const language = (lang || "").trim().split(/\s+/)[0];
   if (language === "mermaid") {
     return `<pre class="mermaid">${escapeHtml(text)}</pre>`;
@@ -156,7 +160,7 @@ codeRenderer.code = ({ text, lang }: Tokens.Code) => {
 marked.setOptions({
   gfm: true,
   breaks: true,
-  renderer: codeRenderer,
+  renderer: customRenderer,
 });
 
 ensureDirectories();

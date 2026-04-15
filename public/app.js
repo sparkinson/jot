@@ -1215,15 +1215,18 @@
     refs.threadRail.innerHTML = "";
 
     if (!state.note) {
+      updateOrphanedButton([], refs);
       return;
     }
 
     if (!state.showComments) {
+      updateOrphanedButton([], refs);
       return;
     }
 
     const canvasRect = refs.previewCanvas.getBoundingClientRect();
     const visible = [];
+    const orphaned = [];
 
     for (const thread of state.threads) {
       if (thread.resolved && !state.showResolved) {
@@ -1231,6 +1234,7 @@
       }
       const match = locateAnchor(thread.anchor, refs.previewContent);
       if (!match) {
+        orphaned.push(thread);
         continue;
       }
       const rects = Array.from(match.range.getClientRects()).filter((rect) => rect.width > 0 && rect.height > 0);
@@ -1259,6 +1263,7 @@
 
     if (!visible.length) {
       refs.threadRail.innerHTML = "";
+      updateOrphanedButton(orphaned, refs);
       return;
     }
 
@@ -1286,6 +1291,70 @@
       item.card.style.top = `${top}px`;
       cursor = top + item.card.offsetHeight + 12;
     }
+
+    updateOrphanedButton(orphaned, refs);
+  }
+
+  function updateOrphanedButton(orphaned, refs) {
+    const controls = document.getElementById("previewControls");
+    if (!controls) return;
+    let btn = controls.querySelector("#orphanedButton");
+    if (!orphaned.length) {
+      if (btn) btn.remove();
+      return;
+    }
+    if (!btn) {
+      btn = document.createElement("jot-button");
+      btn.id = "orphanedButton";
+      btn.setAttribute("variant", "ghost");
+      btn.setAttribute("size", "sm");
+      controls.appendChild(btn);
+      btn.addEventListener("click", () => openOrphanedModal(refs));
+    }
+    setButtonLabel(btn, `${orphaned.length} orphaned`);
+    btn._orphanedThreads = orphaned;
+  }
+
+  function openOrphanedModal(refs) {
+    const btn = document.getElementById("orphanedButton");
+    const orphaned = btn?._orphanedThreads || [];
+    if (!orphaned.length) return;
+
+    const isPublic = state.page === "public";
+    state.modalOpen = true;
+    refs.modalBackdrop.classList.remove("hidden");
+    refs.modalBackdrop.innerHTML = `
+      <div class="modal thread-modal" role="dialog" aria-modal="true">
+        <div class="settings-header">
+          <h2 class="settings-title">Orphaned comments</h2>
+          <jot-icon-button icon="close" label="Close" id="orphanedModalClose"></jot-icon-button>
+        </div>
+        <p class="agent-hint">These comments reference text that has been edited or removed.</p>
+        <div class="orphaned-list">
+          ${orphaned.map((thread) => `
+            <div class="orphaned-thread" data-thread-id="${escapeHtml(thread.id)}">
+              <blockquote class="orphaned-quote">${escapeHtml(thread.anchor?.quote || "unknown text")}</blockquote>
+              ${renderThreadCard(thread)}
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+
+    const close = () => { closeModal(refs); };
+    refs.modalBackdrop.querySelector("#orphanedModalClose").addEventListener("click", close);
+    refs.modalBackdrop.addEventListener("click", (e) => { if (e.target === refs.modalBackdrop) close(); });
+
+    refs.modalBackdrop.querySelector(".orphaned-list").addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button || !button.dataset.action) return;
+      const action = button.dataset.action;
+      const actionThreadId = button.dataset.threadId;
+      const actionMessageId = button.dataset.messageId;
+      if (!action || !actionThreadId) return;
+      await handleThreadAction(action, actionThreadId, actionMessageId, refs, isPublic);
+      openOrphanedModal(refs);
+    });
   }
 
   function renderThreadCard(thread) {

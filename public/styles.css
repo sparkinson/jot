@@ -535,6 +535,11 @@ input:focus, textarea:focus { border-color: var(--muted); }
   .preview-stage.public .preview-close-btn { display: none; }
 }
 
+/* Orphaned comments modal */
+.orphaned-list { overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+.orphaned-thread { border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem; }
+.orphaned-quote { margin: 0 0 0.5rem; padding-left: 0.75rem; border-left: 2px solid var(--muted); color: var(--muted); font-size: 0.85rem; font-style: italic; }
+
 /* Agent modal tabs */
 .agent-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
 .agent-tab { background: none; border: none; color: var(--muted); padding: 0.5rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; font-weight: 500; }

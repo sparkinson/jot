@@ -487,7 +487,7 @@ input:focus, textarea:focus { border-color: var(--muted); }
 }
 
 /* --- Extra-wide desktop: show rail in editor too --- */
-@media (min-width: 1800px) {
+@media (min-width: 2000px) {
   .preview-stage .thread-rail { display: block; }
   .preview-stage .preview-canvas { padding-right: calc(var(--thread-width) + 20px); }
   .workspace { grid-template-columns: minmax(0, 900px) 1fr; }

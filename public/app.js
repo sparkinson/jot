@@ -846,7 +846,6 @@
             </div>
           </div>
           <div class="topbar-right">
-            <jot-icon-button icon="robot" label="Agent setup" id="agentButton"></jot-icon-button>
             <button type="button" class="jot-btn-icon jot-btn-icon--md theme-toggle" aria-label="Toggle theme">${themeIcon(document.documentElement.getAttribute("data-theme") || "dark")}</button>
           </div>
         </header>

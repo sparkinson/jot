@@ -493,6 +493,10 @@ input:focus, textarea:focus { border-color: var(--muted); }
   .workspace { grid-template-columns: minmax(0, 900px) 1fr; }
 }
 
+/* --- Fullscreen preview (hide editor) --- */
+.workspace.preview-fullscreen { grid-template-columns: 1fr; }
+.workspace.preview-fullscreen .editor-pane { display: none; }
+
 /* --- Preview button (editor narrow only, in topbar) --- */
 #previewFab { display: none !important; }
 

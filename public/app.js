@@ -506,6 +506,18 @@
       updateCommentFab(refs);
     });
 
+    const expandPreviewButton = document.getElementById("expandPreviewButton");
+    if (expandPreviewButton) {
+      expandPreviewButton.addEventListener("click", () => {
+        const workspace = document.querySelector(".workspace");
+        if (!workspace) return;
+        const expanded = workspace.classList.toggle("preview-fullscreen");
+        expandPreviewButton.setAttribute("icon", expanded ? "collapse" : "expand");
+        expandPreviewButton.setAttribute("label", expanded ? "Show editor" : "Fullscreen preview");
+        scheduleLayout(refs);
+      });
+    }
+
     if (previewFab) {
       previewFab.addEventListener("click", () => {
         const stage = document.getElementById("previewStage");
@@ -790,6 +802,7 @@
             <span class="status-text" id="saveStatus"></span>
           </div>
           <div class="topbar-right">
+            <jot-icon-button icon="expand" label="Fullscreen preview" id="expandPreviewButton" class="topbar-desktop"></jot-icon-button>
             <jot-icon-button icon="preview" label="Preview" id="previewFab"></jot-icon-button>
             <jot-icon-button icon="robot" label="Agent setup" id="agentButton"></jot-icon-button>
             <div class="share-popover-wrap" id="sharePopoverWrap">
@@ -877,6 +890,7 @@
             <span class="status-text" id="saveStatus"></span>
           </div>
           <div class="topbar-right">
+            <jot-icon-button icon="expand" label="Fullscreen preview" id="expandPreviewButton" class="topbar-desktop"></jot-icon-button>
             <jot-icon-button icon="preview" label="Preview" id="previewFab"></jot-icon-button>
             <jot-icon-button icon="robot" label="Agent setup" id="agentButton"></jot-icon-button>
             <button type="button" class="jot-btn-icon jot-btn-icon--md theme-toggle" aria-label="Toggle theme">${themeIcon(document.documentElement.getAttribute("data-theme") || "dark")}</button>

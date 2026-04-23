@@ -496,6 +496,13 @@ input:focus, textarea:focus { border-color: var(--muted); }
 /* --- Fullscreen preview (hide editor) --- */
 .workspace.preview-fullscreen { grid-template-columns: 1fr; }
 .workspace.preview-fullscreen .editor-pane { display: none; }
+.workspace.preview-fullscreen .preview-content { max-width: 980px; }
+
+/* Show thread rail in fullscreen preview at same breakpoint as public page */
+@media (min-width: 1200px) {
+  .workspace.preview-fullscreen .thread-rail { display: block; }
+  .workspace.preview-fullscreen .preview-canvas { padding-right: calc(var(--thread-width) + 20px); }
+}
 
 /* --- Preview button (editor narrow only, in topbar) --- */
 #previewFab { display: none !important; }
